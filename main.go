@@ -20,8 +20,8 @@ func run() error {
 	}
 	l := Z.API{
 		APIMethod:       "/v1/pbx/redirection/",
-		APIUserKey:      "e30e16c501343883f77e",
-		APISecretKey:    "dbf5605ea4c1f2234201",
+		APIUserKey:      "e30e16c201343883f77e",
+		APISecretKey:    "dbf5606ea4c1f2234201",
 		ParamsUrlValues: url.Values{
 			//"pbx_number": []string{"100"},
 		},
