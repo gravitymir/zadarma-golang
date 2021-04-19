@@ -1,7 +1,3 @@
-[![version](https://img.shields.io/github/package-json/v/gravitymir/zadarma-golang?logo=npm)](https://www.npmjs.com/package/zadarma)
-[![npm downloads per month](https://img.shields.io/npm/dm/zadarma?logo=npm)](https://www.npmjs.com/package/zadarma)
-[![license](https://img.shields.io/npm/l/zadarma?logo=npm)](https://www.npmjs.com/package/zadarma)
-
 ![GitHub last commit](https://img.shields.io/github/last-commit/gravitymir/zadarma-golang?logo=github)
 ![Github Repository Size](https://img.shields.io/github/repo-size/gravitymir/zadarma-golang?logo=github)
 [![Github forks](https://img.shields.io/github/forks/gravitymir/zadarma-golang?logo=github)](https://github.com/gravitymir/zadarma-golang/network/members)
