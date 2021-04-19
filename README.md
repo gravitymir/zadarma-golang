@@ -5,6 +5,9 @@
 [![GitHub open issues](https://img.shields.io/github/issues/gravitymir/zadarma-golang?logo=github)](https://github.com/gravitymir/zadarma-golang/issues)
 [![GitHub closed issues](https://img.shields.io/github/issues-closed/gravitymir/zadarma-golang?logo=github)](https://github.com/gravitymir/zadarma-golang/issues)
 
+[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/gravitymir/zadarma-golang?label=lang&logo=go)](https://golang.org/dl/)
+
+
 [![GitHub Repo stars](https://img.shields.io/github/stars/gravitymir/zadarma-golang?label=zadarma-golang&logo=github&color=505050&logoColor=fff)](https://github.com/gravitymir/zadarma-golang)
 [![GitHub User's stars](https://img.shields.io/github/stars/gravitymir?label=gravitymir&logo=github&color=505050&logoColor=fff)](https://github.com/gravitymir)
 [![Linkedin](https://img.shields.io/badge/AndreySukhodeev-linkedin?logo=linkedin&color=4d4d4d&logoColor=0B66C3)](https://www.linkedin.com/in/andrey-sukhodeev-108a131b9/)
