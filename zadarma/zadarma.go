@@ -1,25 +1,5 @@
 package zadarma
 
-// "bufio"
-// 	"bytes"
-// 	"context"
-// 	"crypto/tls"
-// 	"encoding/base64"
-// 	"errors"
-// 	"fmt"
-// 	"io"
-// 	"mime"
-// 	"mime/multipart"
-// 	"net"
-// 	"net/http/httptrace"
-// 	"net/textproto"
-// 	"net/url"
-// 	urlpkg "net/url"
-// 	"strconv"
-// 	"strings"
-// 	"sync"
-
-// 	"golang.org/x/net/idna"
 import (
 	"bytes"
 	"crypto/hmac"
@@ -30,144 +10,166 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
 	"unicode/utf8"
 )
 
-const (
-	linkToApiZadarma string = "https://api.zadarma.com"
-)
+type ResponceJSON struct {
+	Status   string  `json:"status"`
+	Balance  float64 `json:"balance"`
+	Currency string  `json:"currency"`
+}
 
-type API struct {
+type New struct {
+	LinkToAPI          string
 	HTTPMethod         string
 	APIMethod          string
 	APIUserKey         string
 	APISecretKey       string
-	ParamsString       string
 	ParamsUrlValues    url.Values
 	ParamsMap          map[string]string
-	sortedParamsString string
-	signature          string
+	ParamsString       string
+	SortedParamsString string
+	Signature          string
+	ResponseString     string
+	ResponseStruct     ResponceJSON
 }
 
-func (a *API) request() error {
+func (z *New) prepare() error {
+	var err error
+	if z.HTTPMethod == "" {
+		z.HTTPMethod = http.MethodGet
+	}
+	if z.APIMethod == "" {
+		err = errors.New("error: APIMethod is empty string! example: \"/v1/info/balance/\"")
+	}
+
+	if z.APIUserKey == "" || utf8.RuneCountInString(z.APIUserKey) != 20 {
+		err = errors.New("error: APIUserKey is empty string or length not 20 symbols! example: \"e27e28c201943883f77e\"")
+	}
+	if z.APISecretKey == "" || utf8.RuneCountInString(z.APISecretKey) != 20 {
+		err = errors.New("error: APISecretKey is empty string or length not 20 symbols! example: \"e27e28c201943883f77e\"")
+	}
+
+	if len(z.ParamsUrlValues) == 0 {
+		if len(z.ParamsMap) > 0 {
+			for k, v := range z.ParamsMap {
+				z.ParamsUrlValues.Set(k, v)
+			}
+
+		} else if z.ParamsString != "" {
+			urlValues, err := url.ParseQuery(z.ParamsString)
+			if err != nil {
+				return err
+			}
+			z.ParamsUrlValues = urlValues
+		}
+	}
+
+	z.SortedParamsString = z.ParamsUrlValues.Encode() //Encode "sorted by key"
+	//https://golang.org/pkg/net/url/#Values.Encode
+
+	fmt.Printf("%v", z.SortedParamsString)
+	if z.LinkToAPI == "" {
+		z.LinkToAPI = "https://api.zadarma.com"
+	}
+
+	z.createSignature()
+
+	return err
+}
+
+//Request to API var z.LinkToAPI https://api.zadarma.com
+func (z *New) Request() error {
+
+	if err := z.prepare(); err != nil {
+		return err
+	}
+
 	req, err := http.NewRequest(
-		a.HTTPMethod,
-		linkToApiZadarma+a.APIMethod,
-		bytes.NewBuffer([]byte(a.ParamsUrlValues.Encode())),
+		z.HTTPMethod,
+		z.LinkToAPI+z.APIMethod,
+		bytes.NewBuffer([]byte(z.SortedParamsString)),
 	)
 	if err != nil {
 		return err
 	}
 
-	req.Header.Set("Authorization", a.APIUserKey+":"+a.signature)
+	req.Header.Set("Authorization", z.APIUserKey+":"+z.Signature)
 
 	client := &http.Client{Timeout: time.Second * 10}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("Error reading response. ", err)
+		return err
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal("Error reading body. ", err)
+		return err
 	}
 
-	fmt.Printf("%s\n", body)
+	z.ResponseString = string(body)
+	fmt.Printf("%v", z.ResponseString)
+
+	// var inventory ResponceJSON
+	// if err := json.Unmarshal([]byte(body), &inventory); err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Printf("%v", inventory)
 
 	return nil
 }
 
-func (a *API) createSignature() {
-	a.sortedParamsString = ""
+func (z *New) createSignature() {
 	md5Hash := md5.New()
-	md5Hash.Write([]byte(a.sortedParamsString))
+	md5Hash.Write([]byte(z.SortedParamsString))
 	md5Str := hex.EncodeToString(md5Hash.Sum(nil))
 
-	data := a.APIMethod + a.sortedParamsString + md5Str
+	data := z.APIMethod + z.SortedParamsString + md5Str
 
-	mac := hmac.New(sha1.New, []byte(a.APISecretKey))
+	mac := hmac.New(sha1.New, []byte(z.APISecretKey))
 	mac.Write([]byte(data))
 	macStr := hex.EncodeToString(mac.Sum(nil))
 
-	a.signature = base64.StdEncoding.EncodeToString([]byte(macStr))
+	z.Signature = base64.StdEncoding.EncodeToString([]byte(macStr))
 }
 
-func (a *API) sortParamsString() error {
-	q, err := url.Parse("?" + a.ParamsString)
+// func Request(a Zadarma) (string, error) {
+// 	prepare_data_to_request(&a)
 
-	if err != nil {
-		return errors.New("error: ParamsString is wrong format! example: \"name=Bob&a=1&b=s&c=x\"")
-	}
-	// for k, v := range q.Query() {
-	// 	fmt.Println(k, v[0])
-	// }
-	a.ParamsUrlValues = q.Query()
-	return nil
-}
+// 	resp, err := http.Get(z.LinkToAPI)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	defer resp.Body.Close()
 
-func prepare_data_to_request(a *API) error {
-	var err error = nil
-	if a.HTTPMethod == "" {
-		a.HTTPMethod = http.MethodGet
-	}
-	if a.APIMethod == "" {
-		err = errors.New("error: APIMethod is empty string! example: \"/v1/info/balance/\"")
-	}
+// 	//fmt.Printf("\n%v\n\n", resp.StatusCode)
 
-	if a.APIUserKey == "" || utf8.RuneCountInString(a.APIUserKey) != 20 {
-		err = errors.New("error: APIUserKey is empty string or length not 20 symbols! example: \"e27e28c201943883f77e\"")
-	}
-	if a.APISecretKey == "" || utf8.RuneCountInString(a.APISecretKey) != 20 {
-		err = errors.New("error: APISecretKey is empty string or length not 20 symbols! example: \"e27e28c201943883f77e\"")
-	}
+// 	if resp.StatusCode != http.StatusOK {
+// 		bodyBytes, err := ioutil.ReadAll(resp.Body)
+// 		if err != nil {
+// 			fmt.Println(err)
+// 		}
+// 		bodyString := string(bodyBytes)
+// 		fmt.Printf("%v", bodyString)
+// 	}
 
-	if len(a.ParamsUrlValues) > 0 {
-		a.sortedParamsString = a.ParamsUrlValues.Encode()
+// 	return "asd", err
+// }
 
-	} else if len(a.ParamsMap) > 0 {
-		for k, v := range a.ParamsMap {
-			a.ParamsUrlValues.Set(k, v)
-		}
+// func (a *Zadarma) sortParamsString() error {
+// 	q, err := url.Parse("?" + a.ParamsString)
 
-	} else if a.ParamsString != "" {
-		urlValues, err := url.ParseQuery(a.ParamsString)
-		if err != nil {
-			return err
-		}
-		a.ParamsUrlValues = urlValues
-	}
-
-	a.createSignature()
-	a.request()
-
-	return err
-}
-
-func Request(a API) (string, error) {
-	prepare_data_to_request(&a)
-
-	resp, err := http.Get(linkToApiZadarma)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	//fmt.Printf("\n%v\n\n", resp.StatusCode)
-
-	if resp.StatusCode != http.StatusOK {
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Println(err)
-		}
-		bodyString := string(bodyBytes)
-		fmt.Printf("%v", bodyString)
-	}
-
-	return "asd", err
-}
+// 	if err != nil {
+// 		return errors.New("error: ParamsString is wrong format! example: \"name=Bob&a=1&b=s&c=x\"")
+// 	}
+// 	// for k, v := range q.Query() {
+// 	// 	fmt.Println(k, v[0])
+// 	// }
+// 	a.ParamsUrlValues = q.Query()
+// 	return nil
+// }
