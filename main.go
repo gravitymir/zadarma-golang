@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 
 	z "github.com/gravitymir/zadarma-golang/zadarma"
 )
@@ -23,34 +24,34 @@ func run() error {
 
 	// paramsString := "" //`pbx_number=100`
 
-	zadarmaBalance := z.New{
-		APIMethod:    "/v1/info/balance/",
-		APIUserKey:   "e30e16c201343883f77e",
-		APISecretKey: "dbf5606ea4c1f2234201",
-		// ParamsUrlValues: paramsUrlValues,
-		// ParamsMap:       paramsMap,
-		// ParamsString:    paramsString,
-	}
-
-	if err := zadarmaBalance.Request(); err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	// paramsUrlValues := url.Values{
-	// 	"start": []string{"2018-10-01 08:00:00"},
-	// 	"end":   []string{"2018-11-01 08:00:00"},
+	// zadarmaBalance := z.New{
+	// 	APIMethod:    "/v1/info/balance/",
+	// 	APIUserKey:   "e30e16c201343883f77e",
+	// 	APISecretKey: "dbf5606ea4c1f2234201",
+	// 	// ParamsUrlValues: paramsUrlValues,
+	// 	// ParamsMap:       paramsMap,
+	// 	// ParamsString:    paramsString,
 	// }
-	// statistics := z.New{
-	// 	APIMethod:       "/v1/statistics/",
-	// 	APIUserKey:      "e30e16c201343883f77e",
-	// 	APISecretKey:    "dbf5606ea4c1f2234201",
-	// 	ParamsUrlValues: paramsUrlValues,
-	// }
-	// if err := statistics.Request(); err != nil {
+
+	// if err := zadarmaBalance.Request(); err != nil {
 	// 	fmt.Println(err)
 	// 	return err
 	// }
+
+	paramsUrlValues := url.Values{
+		"start": []string{"2018-10-01 08:00:00"},
+		"end":   []string{"2018-11-01 08:00:00"},
+	}
+	statistics := z.New{
+		APIMethod:       "/v1/statistics/",
+		APIUserKey:      "e56e16c201343883f77e",
+		APISecretKey:    "dbf3006ea4c1f2234201",
+		ParamsUrlValues: paramsUrlValues,
+	}
+	if err := statistics.Go(); err != nil {
+		fmt.Println(err)
+		return err
+	}
 
 	// statisticsPbx := Z.Zadarma{
 	// 	ZadarmaMethod:    "/v1/statistics/pbx/",

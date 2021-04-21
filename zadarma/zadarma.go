@@ -2,6 +2,7 @@ package zadarma
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/md5"
 	"crypto/sha1"
@@ -78,21 +79,32 @@ func (z *New) prepare() error {
 
 	z.createSignature()
 
+	// if z.HTTPMethod == http.MethodGet {
+	// 	z.APIMethod = z.APIMethod + "?" + z.SortedParamsString
+	// 	z.SortedParamsString = ""
+	// }
+
 	return err
 }
 
+func (z *New) request() (*http.Request, error) {
+	return http.NewRequestWithContext(
+		context.Background(),
+		z.HTTPMethod,
+		z.LinkToAPI+z.APIMethod+"?"+z.SortedParamsString,
+		bytes.NewBuffer([]byte("")),
+	)
+}
+
 //Request to API var z.LinkToAPI https://api.zadarma.com
-func (z *New) Request() error {
+func (z *New) Go() error {
 
 	if err := z.prepare(); err != nil {
 		return err
 	}
 
-	req, err := http.NewRequest(
-		z.HTTPMethod,
-		z.LinkToAPI+z.APIMethod,
-		bytes.NewBuffer([]byte(z.SortedParamsString)),
-	)
+	req, err := z.request()
+
 	if err != nil {
 		return err
 	}
