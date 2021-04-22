@@ -17,12 +17,6 @@ import (
 	"unicode/utf8"
 )
 
-type ResponceJSON struct {
-	Status   string  `json:"status"`
-	Balance  float64 `json:"balance"`
-	Currency string  `json:"currency"`
-}
-
 type New struct {
 	LinkToAPI          string
 	HTTPMethod         string
@@ -35,7 +29,6 @@ type New struct {
 	SortedParamsString string
 	Signature          string
 	ResponseBody       []byte
-	responseMap        map[string]interface{}
 }
 
 func (z *New) prepare() error {
