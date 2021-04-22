@@ -7,7 +7,7 @@
 
 [![made-with-Go](https://img.shields.io/badge/Made%20with-Go-00aed8.svg?logo=go)](http://golang.org)
 [![Golang go.mod Go version](https://img.shields.io/github/go-mod/go-version/gravitymir/zadarma-golang?label=mod&logo=go)](https://golang.org/dl/)
-[![GoReportCard](https://goreportcard.com/badge/github.com/gravitymir/zadarma-golang&logo=go)](https://goreportcard.com/report/github.com/gravitymir/zadarma-golang)
+[![GoReportCard](https://goreportcard.com/badge/github.com/gravitymir/zadarma-golang?logo=go)](https://goreportcard.com/report/github.com/gravitymir/zadarma-golang)
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/gravitymir/zadarma-golang?label=zadarma-golang&logo=github&color=505050&logoColor=fff)](https://github.com/gravitymir/zadarma-golang)
 [![GitHub User's stars](https://img.shields.io/github/stars/gravitymir?label=gravitymir&logo=github&color=505050&logoColor=fff)](https://github.com/gravitymir)
