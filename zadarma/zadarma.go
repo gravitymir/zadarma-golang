@@ -17,6 +17,7 @@ import (
 	"unicode/utf8"
 )
 
+//New is main struct
 type New struct {
 	LinkToAPI          string
 	HTTPMethod         string
@@ -83,7 +84,7 @@ func (z *New) request() (*http.Request, error) {
 	)
 }
 
-//Request to API var z.LinkToAPI https://api.zadarma.com
+//Go is request to API Zadarma "https://api.zadarma.com"
 func (z *New) Go() (string, error) {
 
 	if err := z.prepare(); err != nil {
@@ -116,6 +117,7 @@ func (z *New) Go() (string, error) {
 	return string(z.ResponseBody), nil
 }
 
+//GetResponseMap return body from Zadarma API response
 func (z *New) GetResponseMap() (map[string]interface{}, error) {
 	var mapa map[string]interface{}
 
