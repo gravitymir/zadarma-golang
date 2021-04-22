@@ -8,8 +8,8 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -34,8 +34,8 @@ type New struct {
 	ParamsString       string
 	SortedParamsString string
 	Signature          string
-	ResponseString     string
-	ResponseStruct     ResponceJSON
+	ResponseBody       []byte
+	responseMap        map[string]interface{}
 }
 
 func (z *New) prepare() error {
@@ -72,17 +72,11 @@ func (z *New) prepare() error {
 	z.SortedParamsString = z.ParamsUrlValues.Encode() //Encode "sorted by key"
 	//https://golang.org/pkg/net/url/#Values.Encode
 
-	fmt.Printf("%v", z.SortedParamsString)
 	if z.LinkToAPI == "" {
 		z.LinkToAPI = "https://api.zadarma.com"
 	}
 
 	z.createSignature()
-
-	// if z.HTTPMethod == http.MethodGet {
-	// 	z.APIMethod = z.APIMethod + "?" + z.SortedParamsString
-	// 	z.SortedParamsString = ""
-	// }
 
 	return err
 }
@@ -97,16 +91,16 @@ func (z *New) request() (*http.Request, error) {
 }
 
 //Request to API var z.LinkToAPI https://api.zadarma.com
-func (z *New) Go() error {
+func (z *New) Go() (string, error) {
 
 	if err := z.prepare(); err != nil {
-		return err
+		return "", err
 	}
 
 	req, err := z.request()
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	req.Header.Set("Authorization", z.APIUserKey+":"+z.Signature)
@@ -115,27 +109,28 @@ func (z *New) Go() error {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	z.ResponseString = string(body)
-	fmt.Printf("%v", z.ResponseString)
+	z.ResponseBody = body
 
-	// var inventory ResponceJSON
-	// if err := json.Unmarshal([]byte(body), &inventory); err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Printf("%v", inventory)
-
-	return nil
+	return string(z.ResponseBody), nil
 }
 
+func (z *New) GetResponseMap() (map[string]interface{}, error) {
+	var mapa map[string]interface{}
+
+	if err := json.Unmarshal(z.ResponseBody, &mapa); err != nil {
+		return mapa, err
+	}
+	return mapa, nil
+}
 func (z *New) createSignature() {
 	md5Hash := md5.New()
 	md5Hash.Write([]byte(z.SortedParamsString))
@@ -149,39 +144,3 @@ func (z *New) createSignature() {
 
 	z.Signature = base64.StdEncoding.EncodeToString([]byte(macStr))
 }
-
-// func Request(a Zadarma) (string, error) {
-// 	prepare_data_to_request(&a)
-
-// 	resp, err := http.Get(z.LinkToAPI)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	defer resp.Body.Close()
-
-// 	//fmt.Printf("\n%v\n\n", resp.StatusCode)
-
-// 	if resp.StatusCode != http.StatusOK {
-// 		bodyBytes, err := ioutil.ReadAll(resp.Body)
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		bodyString := string(bodyBytes)
-// 		fmt.Printf("%v", bodyString)
-// 	}
-
-// 	return "asd", err
-// }
-
-// func (a *Zadarma) sortParamsString() error {
-// 	q, err := url.Parse("?" + a.ParamsString)
-
-// 	if err != nil {
-// 		return errors.New("error: ParamsString is wrong format! example: \"name=Bob&a=1&b=s&c=x\"")
-// 	}
-// 	// for k, v := range q.Query() {
-// 	// 	fmt.Println(k, v[0])
-// 	// }
-// 	a.ParamsUrlValues = q.Query()
-// 	return nil
-// }

@@ -40,18 +40,21 @@ func run() error {
 
 	paramsUrlValues := url.Values{
 		"start": []string{"2018-10-01 08:00:00"},
-		"end":   []string{"2018-11-01 08:00:00"},
+		"end":   []string{"2018-10-04 08:00:00"},
 	}
 	statistics := z.New{
-		APIMethod:       "/v1/statistics/",
-		APIUserKey:      "e56e16c201343883f77e",
-		APISecretKey:    "dbf3006ea4c1f2234201",
+		APIMethod:    "/v1/statistics/",
+		APIUserKey:   "e30e16c201343883f77e",
+		APISecretKey: "dbf5606ea4c1f2234201",
+
 		ParamsUrlValues: paramsUrlValues,
 	}
-	if err := statistics.Go(); err != nil {
+	_, err := statistics.Go()
+	if err != nil {
 		fmt.Println(err)
 		return err
 	}
+	fmt.Println(statistics.GetResponseMap())
 
 	// statisticsPbx := Z.Zadarma{
 	// 	ZadarmaMethod:    "/v1/statistics/pbx/",
