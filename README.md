@@ -14,5 +14,7 @@
 [![Linkedin](https://img.shields.io/badge/AndreySukhodeev-linkedin?logo=linkedin&color=4d4d4d&logoColor=0B66C3)](https://www.linkedin.com/in/andrey-sukhodeev-108a131b9/)
 [![Linkedin](https://img.shields.io/badge/Gravitymir-telegram?logo=telegram&color=4d4d4d&logoColor=1F97D5)](https://t.me/gravitymir)
 
+[![Stargazers over time](https://starchart.cc/Naereen/badges.svg)](https://starchart.cc/Naereen/badges)
+
 # zadarma-golang
 Library which help you work with API Zadarma (v1)
