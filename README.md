@@ -1,5 +1,5 @@
 
-![visitors](https://visitor-badge.laobi.icu/badge?page_id=gravitymir.zadarma-golang)
+![visitors](https://visitor-badge.laobi.icu/badge?page_id=gravitymir)
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/gravitymir/zadarma-golang?logo=github)
 ![Github Repository Size](https://img.shields.io/github/repo-size/gravitymir/zadarma-golang?logo=github)
