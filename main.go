@@ -43,18 +43,43 @@ func run() error {
 		"end":   []string{"2018-10-04 08:00:00"},
 	}
 	statistics := z.New{
-		APIMethod:    "/v1/statistics/",
-		APIUserKey:   "e30e16c201343883f77e",
-		APISecretKey: "dbf5606ea4c1f2234201",
+		APIMethod:    "/v1/info/balance/",
+		APIUserKey:   "e30e16c201343883f72e",
+		APISecretKey: "dbf5606ea4c1f2234701",
 
 		ParamsUrlValues: paramsUrlValues,
 	}
-	_, err := statistics.Go()
+	statMap, err := statistics.Request()
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
-	fmt.Println(statistics.GetResponseMap())
+
+	fmt.Println("APIUserKey: ", statistics.APIUserKey)
+	fmt.Println("APISecretKey: ", statistics.APISecretKey)
+	fmt.Println("HTTPMethod: ", statistics.HTTPMethod)
+	fmt.Println("APIMethod: ", statistics.APIMethod)
+	fmt.Println("LinkToAPI: ", statistics.LinkToAPI)
+	fmt.Println("\nParamsUrlValues: ", statistics.ParamsUrlValues)
+	fmt.Println("\nParamsMap: ", statistics.ParamsMap)
+	fmt.Println("\nParamsString: ", statistics.ParamsString)
+	fmt.Println("\nResponseRaw string: ", string(statistics.ResponseRaw))
+	fmt.Println("\nSignature: ", statistics.Signature)
+	fmt.Println("\nSortedParamsString: ", statistics.SortedParamsString)
+	fmt.Println("\n\n->")
+
+	if statMap["status"] == "success" {
+		fmt.Printf("status: \033[1;32m%s\033[0m\n", statMap["status"])
+		for k, v := range statMap {
+			if k == "status" {
+				continue
+			}
+			fmt.Printf("%v: %v\n", k, v)
+		}
+	} else {
+		fmt.Printf("status: \033[1;31m%s\033[0m\n", statMap["status"])
+		fmt.Printf("Error: %v\n", statMap["message"])
+	}
 
 	// statisticsPbx := Z.Zadarma{
 	// 	ZadarmaMethod:    "/v1/statistics/pbx/",

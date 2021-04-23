@@ -19,20 +19,20 @@ import (
 
 //New is main struct
 type New struct {
-	LinkToAPI          string
-	HTTPMethod         string
-	APIMethod          string
 	APIUserKey         string
 	APISecretKey       string
+	HTTPMethod         string
+	APIMethod          string
+	LinkToAPI          string
 	ParamsUrlValues    url.Values
 	ParamsMap          map[string]string
 	ParamsString       string
 	SortedParamsString string
 	Signature          string
-	ResponseBody       []byte
+	ResponseRaw        []byte
 }
 
-func (z *New) prepare() error {
+func (z *New) prepareData() error {
 	var err error
 	if z.HTTPMethod == "" {
 		z.HTTPMethod = http.MethodGet
@@ -75,7 +75,7 @@ func (z *New) prepare() error {
 	return err
 }
 
-func (z *New) request() (*http.Request, error) {
+func (z *New) getHttpRequest() (*http.Request, error) {
 	return http.NewRequestWithContext(
 		context.Background(),
 		z.HTTPMethod,
@@ -84,17 +84,17 @@ func (z *New) request() (*http.Request, error) {
 	)
 }
 
-//Go is request to API Zadarma "https://api.zadarma.com"
-func (z *New) Go() (string, error) {
-
-	if err := z.prepare(); err != nil {
-		return "", err
+//Request is request to API Zadarma "https://api.zadarma.com"
+func (z *New) Request() (map[string]interface{}, error) {
+	var zMap map[string]interface{}
+	if err := z.prepareData(); err != nil {
+		return zMap, err
 	}
 
-	req, err := z.request()
+	req, err := z.getHttpRequest()
 
 	if err != nil {
-		return "", err
+		return zMap, err
 	}
 
 	req.Header.Set("Authorization", z.APIUserKey+":"+z.Signature)
@@ -103,29 +103,24 @@ func (z *New) Go() (string, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return zMap, err
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return zMap, err
 	}
 
-	z.ResponseBody = body
+	z.ResponseRaw = body
 
-	return string(z.ResponseBody), nil
-}
-
-//GetResponseMap return body from Zadarma API response
-func (z *New) GetResponseMap() (map[string]interface{}, error) {
-	var mapa map[string]interface{}
-
-	if err := json.Unmarshal(z.ResponseBody, &mapa); err != nil {
-		return mapa, err
+	if err := json.Unmarshal(z.ResponseRaw, &zMap); err != nil {
+		return zMap, err
 	}
-	return mapa, nil
+
+	return zMap, nil
 }
+
 func (z *New) createSignature() {
 	md5Hash := md5.New()
 	md5Hash.Write([]byte(z.SortedParamsString))
