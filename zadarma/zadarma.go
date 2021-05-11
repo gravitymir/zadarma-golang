@@ -28,36 +28,43 @@ type New struct {
 	ParamsMap          map[string]string
 	ParamsString       string
 	SortedParamsString string
+	Timeout            uint64
 	Signature          string
 	ResponseRaw        []byte
+	Error              error
+	Status             bool
+	Result             map[string]interface{}
 }
 
-func (z *New) prepareData() error {
-	var err error
+func (z *New) prepareData() {
 	if z.HTTPMethod == "" {
 		z.HTTPMethod = http.MethodGet
 	}
 	if z.APIMethod == "" {
-		err = errors.New("error: APIMethod is empty string! example: \"/v1/info/balance/\"")
+		z.Error = errors.New("error: APIMethod is empty string! example: \"/v1/info/balance/\"")
 	}
 
 	if z.APIUserKey == "" || utf8.RuneCountInString(z.APIUserKey) != 20 {
-		err = errors.New("error: APIUserKey is empty string or length not 20 symbols! example: \"e27e28c201943883f77e\"")
+		z.Error = errors.New("error: APIUserKey is empty string or length not 20 symbols! example: \"e27e28c201943883f77e\"")
 	}
 	if z.APISecretKey == "" || utf8.RuneCountInString(z.APISecretKey) != 20 {
-		err = errors.New("error: APISecretKey is empty string or length not 20 symbols! example: \"e27e28c201943883f77e\"")
+		z.Error = errors.New("error: APISecretKey is empty string or length not 20 symbols! example: \"e27e28c201943883f77e\"")
 	}
 
-	if len(z.ParamsUrlValues) == 0 {
-		if len(z.ParamsMap) > 0 {
+	//1 priority ParamsUrlValues high
+	//2 priority ParamsMap medium
+	//3 priority ParamsString low
+	if len(z.ParamsUrlValues) == 0 { //high priority
+		if len(z.ParamsMap) > 0 { //medium priority
 			for k, v := range z.ParamsMap {
 				z.ParamsUrlValues.Set(k, v)
 			}
 
-		} else if z.ParamsString != "" {
+		} else if z.ParamsString != "" { //low priority
 			urlValues, err := url.ParseQuery(z.ParamsString)
 			if err != nil {
-				return err
+				z.Error = err
+				return
 			}
 			z.ParamsUrlValues = urlValues
 		}
@@ -72,7 +79,6 @@ func (z *New) prepareData() error {
 
 	z.createSignature()
 
-	return err
 }
 
 func (z *New) getHttpRequest() (*http.Request, error) {
@@ -85,40 +91,65 @@ func (z *New) getHttpRequest() (*http.Request, error) {
 }
 
 //Request is request to API Zadarma "https://api.zadarma.com"
-func (z *New) Request() (map[string]interface{}, error) {
-	var zMap map[string]interface{}
-	if err := z.prepareData(); err != nil {
-		return zMap, err
+func (z *New) Request() *New {
+	z.SortedParamsString = ""
+	if z.Timeout == 0 {
+		z.Timeout = 5
+	}
+	z.Signature = ""
+	z.ResponseRaw = []byte{}
+	z.Error = nil
+	z.Status = false
+	z.Result = map[string]interface{}{}
+
+	z.prepareData()
+
+	if z.Error != nil {
+		return z
 	}
 
 	req, err := z.getHttpRequest()
 
 	if err != nil {
-		return zMap, err
+		z.Error = err
+		return z
 	}
 
 	req.Header.Set("Authorization", z.APIUserKey+":"+z.Signature)
 
-	client := &http.Client{Timeout: time.Second * 10}
+	client := &http.Client{Timeout: time.Second * time.Duration(z.Timeout)}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return zMap, err
+		z.Error = err
+		return z
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return zMap, err
+		z.Error = err
+		return z
 	}
 
 	z.ResponseRaw = body
 
-	if err := json.Unmarshal(z.ResponseRaw, &zMap); err != nil {
-		return zMap, err
+	if err := json.Unmarshal(z.ResponseRaw, &z.Result); err != nil {
+		z.Error = err
+		return z
 	}
 
-	return zMap, nil
+	if z.Result["status"] == "success" {
+		delete(z.Result, "status")
+		z.Status = true
+	} else if z.Result["status"] == "error" {
+
+		z.Error = errors.New("error: " + z.Result["message"].(string))
+		delete(z.Result, "status")
+		delete(z.Result, "message")
+	}
+
+	return z
 }
 
 func (z *New) createSignature() {
