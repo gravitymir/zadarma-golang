@@ -20,6 +20,7 @@ func run() error {
 		"start": []string{"2018-10-01 08:00:00"},
 		"end":   []string{"2018-10-04 08:00:00"},
 	}
+
 	statistics := z.New{
 		APIMethod:    "/v1/info/balance/",
 		APIUserKey:   "e30e16c201343883f77e",
