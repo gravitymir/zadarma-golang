@@ -31,25 +31,22 @@ func run() error {
 
 			//ParamsUrlValues: paramsUrlValues,
 		}
-
 		balance.Request()
-		// fmt.Println("APIUserKey: ", balance.APIUserKey)
-		// fmt.Println("APISecretKey: ", balance.APISecretKey)
-		// fmt.Println("HTTPMethod: ", balance.HTTPMethod)
-		// fmt.Println("APIMethod: ", balance.APIMethod)
-		// fmt.Println("LinkToAPI: ", balance.LinkToAPI)
-		// fmt.Println("ParamsUrlValues: ", balance.ParamsUrlValues)
-		// fmt.Println("ParamsMap: ", balance.ParamsMap)
-		// fmt.Println("ParamsString: ", balance.ParamsString)
-		// fmt.Println("ResponseRaw: ", string(balance.ResponseRaw))
-		// fmt.Println("Signature: ", balance.Signature)
-		// fmt.Println("SortedParamsString: ", balance.SortedParamsString)
-		// fmt.Println("\n->")
 
-		//fmt.Println(balance.Ok)
-		//fmt.Println(balance.Result)
-		//fmt.Println(balance.Result.Info)
-		//fmt.Println(balance.Result.Message)
+		type balanceSt struct {
+			Status   string  `json:"status"`
+			Message  string  `json:"message"`
+			Balance  float64 `json:"balance"`
+			Currency string  `json:"currency"`
+		}
+
+		balanceData := balanceSt{}
+		if err := json.Unmarshal(balance.Response, &balanceData); err != nil {
+			balance.Error = err
+		}
+
+		fmt.Println("Balance: ", balanceData)
+
 		return balance.Error
 	})
 
@@ -75,28 +72,29 @@ func run() error {
 		// fmt.Println("SortedParamsString: ", tariff.SortedParamsString)
 		// fmt.Println("\n->")
 
-		fmt.Println(tariff.Ok)
-		fmt.Println(tariff.Result)
-		//fmt.Println(tariff.Result["info"])
-		type m struct {
-			Cost                  float64 `json:"cost"`
-			Currency              string  `json:"currency"`
-			IsActive              string  `json:"is_active"`
-			TariffForNextPeriod   string  `json:"tariff_for_next_period"`
-			TariffId              uint64  `json:"tariff_id"`
-			TariffIdForNextPeriod uint64  `json:"tariff_id_for_next_period"`
-			TariffName            string  `json:"tariff_name"`
+		type tariffSt struct {
+			Status  string `json:"status"`
+			Message string `json:"message"`
+			Info    struct {
+				TariffId                  uint64  `json:"tariff_id"`
+				TariffName                string  `json:"tariff_name"`
+				IsActive                  string  `json:"is_active"`
+				Cost                      float64 `json:"cost"`
+				Currency                  string  `json:"currency"`
+				Used_seconds              uint64  `json:"used_seconds"`
+				Used_seconds_mobile       uint64  `json:"used_seconds_mobile"`
+				Used_seconds_fix          uint64  `json:"used_seconds_fix"`
+				Tariff_id_for_next_period uint64  `json:"tariff_id_for_next_period"`
+				Tariff_for_next_period    string  `json:"tariff_for_next_period"`
+			} `json:"info"`
+		}
+		tariffData := tariffSt{}
+		if err := json.Unmarshal(tariff.Response, &tariffData); err != nil {
+			tariff.Error = err
 		}
 
-		mm := m{}
-		mbyte, err := json.Marshal(tariff.Result.Info)
-		if err != nil {
-			fmt.Println(err)
-		}
-		if err := json.Unmarshal(mbyte, &mm); err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println(mm)
+		fmt.Println("Tariff: ", tariffData)
+
 		return tariff.Error
 	})
 

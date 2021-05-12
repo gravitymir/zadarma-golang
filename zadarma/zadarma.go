@@ -8,22 +8,13 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
 	"unicode/utf8"
 )
-
-type response struct {
-	Status  string                 `json:"status"`
-	Info    map[string]interface{} `json:"info"`
-	Message string                 `json:"message"`
-	Error   error                  `json:"error"`
-}
 
 //New is main struct
 type New struct {
@@ -38,30 +29,24 @@ type New struct {
 	SortedParamsString string
 	Timeout            uint64
 	Signature          string
-	ResponseRaw        []byte
+	Response           []byte
 	Error              error
-	Ok                 bool
-	Result             response
 }
 
 func (z *New) prepareData() {
-	if z.HTTPMethod == "" {
-		z.HTTPMethod = http.MethodGet
-	}
 	if z.APIMethod == "" {
-		z.Error = errors.New("error: APIMethod is empty string! example: \"/v1/info/balance/\"")
+		z.Error = errors.New("error: APIMethod is empty! example: \"/v1/info/balance/\"")
 	}
-
 	if z.APIUserKey == "" || utf8.RuneCountInString(z.APIUserKey) != 20 {
-		z.Error = errors.New("error: APIUserKey is empty string or length not 20 symbols! example: \"e27e28c201943883f77e\"")
+		z.Error = errors.New("error: APIUserKey is empty or length != 20 runes! example: \"e27e28c201943883f77e\"")
 	}
 	if z.APISecretKey == "" || utf8.RuneCountInString(z.APISecretKey) != 20 {
-		z.Error = errors.New("error: APISecretKey is empty string or length not 20 symbols! example: \"e27e28c201943883f77e\"")
+		z.Error = errors.New("error: APISecretKey is empty or length != 20 runes! example: \"e27e28c201943883f77e\"")
 	}
-
-	//1 priority ParamsUrlValues high
-	//2 priority ParamsMap medium
-	//3 priority ParamsString low
+	//priority of incoming parameters
+	//high ParamsUrlValues
+	//medium ParamsMap
+	//low ParamsString
 	if len(z.ParamsUrlValues) == 0 { //high priority
 		if len(z.ParamsMap) > 0 { //medium priority
 			for k, v := range z.ParamsMap {
@@ -77,43 +62,40 @@ func (z *New) prepareData() {
 			z.ParamsUrlValues = urlValues
 		}
 	}
-
-	z.SortedParamsString = z.ParamsUrlValues.Encode() //Encode "sorted by key"
+	//Encode "sorted by key"
+	z.SortedParamsString = z.ParamsUrlValues.Encode()
 	//https://golang.org/pkg/net/url/#Values.Encode
-
-	if z.LinkToAPI == "" {
-		z.LinkToAPI = "https://api.zadarma.com"
-	}
-
-	z.createSignature()
-
 }
 
 func (z *New) getHttpRequest() (*http.Request, error) {
-	return http.NewRequestWithContext(
+	return http.NewRequestWithContext( // maybe need http.NewRequest()
 		context.Background(),
 		z.HTTPMethod,
-		z.LinkToAPI+z.APIMethod+"?"+z.SortedParamsString,
+		z.LinkToAPI+z.APIMethod+"?"+z.SortedParamsString, //URL to API
 		bytes.NewBuffer([]byte("")),
 	)
 }
 
 //Request is request to API Zadarma "https://api.zadarma.com"
 func (z *New) Request() {
-	z.SortedParamsString = ""
+	//new datas after every new request
+	//z.SortedParamsString = ""
+	//z.Signature = ""
+	//z.ResponseRaw = []byte{}
+	if z.HTTPMethod == "" {
+		z.HTTPMethod = http.MethodGet
+	}
+	if z.LinkToAPI == "" {
+		z.LinkToAPI = "https://api.zadarma.com"
+	}
 	if z.Timeout == 0 {
 		z.Timeout = 5
 	}
-	z.Signature = ""
-	z.ResponseRaw = []byte{}
 	z.Error = nil
-	z.Ok = false
-	z.Result = response{}
+	z.Response = []byte{}
 
 	z.prepareData()
-
-	if z.Error != nil {
-	}
+	z.createSignature()
 
 	req, err := z.getHttpRequest()
 
@@ -123,33 +105,20 @@ func (z *New) Request() {
 
 	req.Header.Set("Authorization", z.APIUserKey+":"+z.Signature)
 
+	//Timeout request
 	client := &http.Client{Timeout: time.Second * time.Duration(z.Timeout)}
 
-	resp, err := client.Do(req)
+	r, err := client.Do(req) //request
 	if err != nil {
 		z.Error = err
 	}
-	defer resp.Body.Close()
+	defer r.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		z.Error = err
 	}
-
-	z.ResponseRaw = body
-
-	if err := json.Unmarshal(z.ResponseRaw, &z.Result); err != nil {
-		z.Error = err
-	}
-
-	fmt.Println(z.Result)
-	fmt.Println(z.Result)
-	fmt.Println(z.Result)
-	fmt.Println(z.Result)
-
-	if z.Result.Status == "success" {
-		z.Ok = true
-	}
+	z.Response = body
 }
 
 func (z *New) createSignature() {
