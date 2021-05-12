@@ -1,10 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"net/url"
 
-	z "github.com/gravitymir/zadarma-golang/zadarma"
+	zApi "github.com/gravitymir/zadarma-golang/zadarma"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -16,44 +16,88 @@ func main() {
 
 func run() error {
 
-	paramsUrlValues := url.Values{
-		"start": []string{"2018-10-01 08:00:00"},
-		"end":   []string{"2018-10-04 08:00:00"},
-	}
-
-	statistics := z.New{
-		APIMethod:    "/v1/info/balance/",
-		APIUserKey:   "e30e16c201343883f77e",
-		APISecretKey: "dbf5606ea4c1f2234201",
-
-		ParamsUrlValues: paramsUrlValues,
-	}
-
 	g := new(errgroup.Group)
 
 	g.Go(func() error {
-		statistics.Request()
-		fmt.Println("APIUserKey: ", statistics.APIUserKey)
-		fmt.Println("APISecretKey: ", statistics.APISecretKey)
-		fmt.Println("HTTPMethod: ", statistics.HTTPMethod)
-		fmt.Println("APIMethod: ", statistics.APIMethod)
-		fmt.Println("LinkToAPI: ", statistics.LinkToAPI)
-		fmt.Println("ParamsUrlValues: ", statistics.ParamsUrlValues)
-		fmt.Println("ParamsMap: ", statistics.ParamsMap)
-		fmt.Println("ParamsString: ", statistics.ParamsString)
-		fmt.Println("ResponseRaw: ", string(statistics.ResponseRaw))
-		fmt.Println("Signature: ", statistics.Signature)
-		fmt.Println("SortedParamsString: ", statistics.SortedParamsString)
-		fmt.Println("\n->")
+		// paramsUrlValues := url.Values{
+		// 	"start": []string{"2018-10-01 08:00:00"},
+		// 	"end":   []string{"2018-10-04 08:00:00"},
+		// }
 
-		fmt.Println(statistics.Status)
-		//fmt.Println(statistics.Error)
-		fmt.Println(statistics.Result)
-		fmt.Printf("%T\n", statistics.Result["balance"])
-		fmt.Println(statistics.Result["balance"])
-		fmt.Println(statistics.Result["currency"])
+		balance := zApi.New{
+			APIMethod:    "/v1/info/balance/",
+			APIUserKey:   "e30e16c201343883f77e",
+			APISecretKey: "dbf5606ea4c1f2234201",
 
-		return statistics.Error
+			//ParamsUrlValues: paramsUrlValues,
+		}
+
+		balance.Request()
+		// fmt.Println("APIUserKey: ", balance.APIUserKey)
+		// fmt.Println("APISecretKey: ", balance.APISecretKey)
+		// fmt.Println("HTTPMethod: ", balance.HTTPMethod)
+		// fmt.Println("APIMethod: ", balance.APIMethod)
+		// fmt.Println("LinkToAPI: ", balance.LinkToAPI)
+		// fmt.Println("ParamsUrlValues: ", balance.ParamsUrlValues)
+		// fmt.Println("ParamsMap: ", balance.ParamsMap)
+		// fmt.Println("ParamsString: ", balance.ParamsString)
+		// fmt.Println("ResponseRaw: ", string(balance.ResponseRaw))
+		// fmt.Println("Signature: ", balance.Signature)
+		// fmt.Println("SortedParamsString: ", balance.SortedParamsString)
+		// fmt.Println("\n->")
+
+		//fmt.Println(balance.Ok)
+		//fmt.Println(balance.Result)
+		//fmt.Println(balance.Result.Info)
+		//fmt.Println(balance.Result.Message)
+		return balance.Error
+	})
+
+	g.Go(func() error {
+
+		tariff := zApi.New{
+			APIMethod:    "/v1/tariff/",
+			APIUserKey:   "e30e16c201343883f77e",
+			APISecretKey: "dbf5606ea4c1f2234201",
+		}
+
+		tariff.Request()
+		// fmt.Println("APIUserKey: ", tariff.APIUserKey)
+		// fmt.Println("APISecretKey: ", tariff.APISecretKey)
+		// fmt.Println("HTTPMethod: ", tariff.HTTPMethod)
+		// fmt.Println("APIMethod: ", tariff.APIMethod)
+		// fmt.Println("LinkToAPI: ", tariff.LinkToAPI)
+		// fmt.Println("ParamsUrlValues: ", tariff.ParamsUrlValues)
+		// fmt.Println("ParamsMap: ", tariff.ParamsMap)
+		// fmt.Println("ParamsString: ", tariff.ParamsString)
+		// fmt.Println("ResponseRaw: ", string(tariff.ResponseRaw))
+		// fmt.Println("Signature: ", tariff.Signature)
+		// fmt.Println("SortedParamsString: ", tariff.SortedParamsString)
+		// fmt.Println("\n->")
+
+		fmt.Println(tariff.Ok)
+		fmt.Println(tariff.Result)
+		//fmt.Println(tariff.Result["info"])
+		type m struct {
+			Cost                  float64 `json:"cost"`
+			Currency              string  `json:"currency"`
+			IsActive              string  `json:"is_active"`
+			TariffForNextPeriod   string  `json:"tariff_for_next_period"`
+			TariffId              uint64  `json:"tariff_id"`
+			TariffIdForNextPeriod uint64  `json:"tariff_id_for_next_period"`
+			TariffName            string  `json:"tariff_name"`
+		}
+
+		mm := m{}
+		mbyte, err := json.Marshal(tariff.Result.Info)
+		if err != nil {
+			fmt.Println(err)
+		}
+		if err := json.Unmarshal(mbyte, &mm); err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(mm)
+		return tariff.Error
 	})
 
 	return g.Wait()

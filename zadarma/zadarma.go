@@ -10,12 +10,20 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
 	"unicode/utf8"
 )
+
+type response struct {
+	Status  string                 `json:"status"`
+	Info    map[string]interface{} `json:"info"`
+	Message string                 `json:"message"`
+	Error   error                  `json:"error"`
+}
 
 //New is main struct
 type New struct {
@@ -32,8 +40,8 @@ type New struct {
 	Signature          string
 	ResponseRaw        []byte
 	Error              error
-	Status             bool
-	Result             map[string]interface{}
+	Ok                 bool
+	Result             response
 }
 
 func (z *New) prepareData() {
@@ -91,7 +99,7 @@ func (z *New) getHttpRequest() (*http.Request, error) {
 }
 
 //Request is request to API Zadarma "https://api.zadarma.com"
-func (z *New) Request() *New {
+func (z *New) Request() {
 	z.SortedParamsString = ""
 	if z.Timeout == 0 {
 		z.Timeout = 5
@@ -99,20 +107,18 @@ func (z *New) Request() *New {
 	z.Signature = ""
 	z.ResponseRaw = []byte{}
 	z.Error = nil
-	z.Status = false
-	z.Result = map[string]interface{}{}
+	z.Ok = false
+	z.Result = response{}
 
 	z.prepareData()
 
 	if z.Error != nil {
-		return z
 	}
 
 	req, err := z.getHttpRequest()
 
 	if err != nil {
 		z.Error = err
-		return z
 	}
 
 	req.Header.Set("Authorization", z.APIUserKey+":"+z.Signature)
@@ -122,34 +128,28 @@ func (z *New) Request() *New {
 	resp, err := client.Do(req)
 	if err != nil {
 		z.Error = err
-		return z
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		z.Error = err
-		return z
 	}
 
 	z.ResponseRaw = body
 
 	if err := json.Unmarshal(z.ResponseRaw, &z.Result); err != nil {
 		z.Error = err
-		return z
 	}
 
-	if z.Result["status"] == "success" {
-		delete(z.Result, "status")
-		z.Status = true
-	} else if z.Result["status"] == "error" {
+	fmt.Println(z.Result)
+	fmt.Println(z.Result)
+	fmt.Println(z.Result)
+	fmt.Println(z.Result)
 
-		z.Error = errors.New("error: " + z.Result["message"].(string))
-		delete(z.Result, "status")
-		delete(z.Result, "message")
+	if z.Result.Status == "success" {
+		z.Ok = true
 	}
-
-	return z
 }
 
 func (z *New) createSignature() {
