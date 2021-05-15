@@ -1,6 +1,6 @@
 .PHONY: build
 build:
-		go build -o z_api -v .
+		go build -o z_api -v ./
 		./z_api
 
 .PHONY: test
