@@ -30,18 +30,17 @@ type New struct {
 	Timeout            uint64
 	Signature          string
 	Response           []byte
-	Error              error
 }
 
-func (z *New) prepareData() {
+func (z *New) prepareData() error {
 	if z.APIMethod == "" {
-		z.Error = errors.New("error: APIMethod is empty! example: \"/v1/info/balance/\"")
+		return errors.New("error: APIMethod is empty! example: \"/v1/info/balance/\"")
 	}
 	if z.APIUserKey == "" || utf8.RuneCountInString(z.APIUserKey) != 20 {
-		z.Error = errors.New("error: APIUserKey is empty or length != 20 runes! example: \"e27e28c201943883f77e\"")
+		return errors.New("error: APIUserKey is empty or length != 20 runes! example: \"e27e28c201943883f77e\"")
 	}
 	if z.APISecretKey == "" || utf8.RuneCountInString(z.APISecretKey) != 20 {
-		z.Error = errors.New("error: APISecretKey is empty or length != 20 runes! example: \"e27e28c201943883f77e\"")
+		return errors.New("error: APISecretKey is empty or length != 20 runes! example: \"e27e28c201943883f77e\"")
 	}
 	//priority of incoming parameters
 	//high ParamsUrlValues
@@ -54,17 +53,17 @@ func (z *New) prepareData() {
 			}
 
 		} else if z.ParamsString != "" { //low priority
-			urlValues, err := url.ParseQuery(z.ParamsString)
-			if err != nil {
-				z.Error = err
-				return
+			if urlValues, err := url.ParseQuery(z.ParamsString); err != nil {
+				return err
+			} else {
+				z.ParamsUrlValues = urlValues
 			}
-			z.ParamsUrlValues = urlValues
 		}
 	}
 	//Encode "sorted by key"
 	z.SortedParamsString = z.ParamsUrlValues.Encode()
 	//https://golang.org/pkg/net/url/#Values.Encode
+	return nil
 }
 
 func (z *New) getHttpRequest() (*http.Request, error) {
@@ -77,7 +76,7 @@ func (z *New) getHttpRequest() (*http.Request, error) {
 }
 
 //Request is request to API Zadarma "https://api.zadarma.com"
-func (z *New) Request() {
+func (z *New) Request() error {
 	//new datas after every new request
 	//z.SortedParamsString = ""
 	//z.Signature = ""
@@ -91,16 +90,18 @@ func (z *New) Request() {
 	if z.Timeout == 0 {
 		z.Timeout = 5
 	}
-	z.Error = nil
 	z.Response = []byte{}
 
-	z.prepareData()
+	if err := z.prepareData(); err != nil {
+		return err
+	}
+
 	z.createSignature()
 
 	req, err := z.getHttpRequest()
 
 	if err != nil {
-		z.Error = err
+		return err
 	}
 
 	req.Header.Set("Authorization", z.APIUserKey+":"+z.Signature)
@@ -110,15 +111,17 @@ func (z *New) Request() {
 
 	r, err := client.Do(req) //request
 	if err != nil {
-		z.Error = err
+		return err
 	}
 	defer r.Body.Close()
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		z.Error = err
+		return err
 	}
 	z.Response = body
+
+	return nil
 }
 
 func (z *New) createSignature() {
