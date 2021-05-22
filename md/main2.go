@@ -11,10 +11,6 @@ func main() {
 	if err := statistics(); err != nil {
 		fmt.Printf("%v\n", err)
 	}
-	if err := statistics(); err != nil {
-		fmt.Printf("%v\n", err)
-	}
-
 }
 func prettyPrint(data interface{}) {
 	dataJSON, err := json.MarshalIndent(data, "", "  ")
@@ -55,7 +51,7 @@ func statistics() error {
 			"end":   "2018-10-04 08:00:00",
 			"start": "2018-09-01 08:00:00",
 		},
-		Timeout: 400, //Miliseconds
+		Timeout: 1000, //Miliseconds
 	}
 
 	data := []byte{}

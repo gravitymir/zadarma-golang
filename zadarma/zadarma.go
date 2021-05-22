@@ -27,7 +27,6 @@ type New struct {
 	ParamsMap          map[string]string
 	ParamsString       string
 	SortedParamsString string
-	FullLink           string
 	Timeout            uint64
 	Signature          string
 }
@@ -126,7 +125,6 @@ func prepareData(z *New) (string, error) {
 }
 
 func getHttpRequest(z *New) (*http.Request, error) {
-	z.FullLink = z.LinkToAPI + z.APIMethod + "?" + z.SortedParamsString
 	return http.NewRequestWithContext( // maybe need http.NewRequest()
 		context.Background(),
 		z.HTTPMethod,
