@@ -276,15 +276,26 @@ func infoTimezone() error {
 }
 ```
 
-## HTTPMethod Post
+## HTTPMethod POST Send SMS
+
+[api_sms_send](https://zadarma.com/ru/support/api/#api_sms_send)
+
 ``` go
 func smsSend() error {
 
 	sms := zApi.New{
-		HTTPMethod:   http.MethodPost,
+		HTTPMethod:   http.MethodPost, // or "POST"
 		APIMethod:    "/v1/sms/send/",
 		APIUserKey:   "e30e16c201343883f77e",
 		APISecretKey: "dbf5606ea4c1f2234201",
+		//params in map
+		ParamsMap: map[string]string{
+			"number":  "67200000000",
+			"message": "Text сообщения\nперенос строки\n1234567890",
+		},
+		//params in string
+		ParamsString: "number=67200000000&message=Text сообщения\nперенос строки\n1234567890",
+		//params in url.Values [recommend]
 		ParamsUrlValues: url.Values{
 			"number": []string{
 				"67200000000", //recipient's phone number
@@ -313,5 +324,4 @@ func smsSend() error {
 
 	return nil
 }
-
 ```
