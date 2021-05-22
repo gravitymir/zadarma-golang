@@ -12,10 +12,10 @@ type CatchInfoBalance struct {
 type CatchInfoPrice struct {
 	Status string `json:"status"`
 	Info   struct {
-		Prefix      string `json:"prefix"`
-		Description string `json:"description"`
-		Price       string `json:"price"`
-		Currency    string `json:"currency"`
+		Prefix      string  `json:"prefix"`
+		Description string  `json:"description"`
+		Price       float32 `json:"price"`
+		Currency    string  `json:"currency"`
 	}
 	Message string `json:"message"`
 }

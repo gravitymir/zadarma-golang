@@ -1,8 +1,6 @@
 package zadarma
 
 import (
-	"bytes"
-	"context"
 	"crypto/hmac"
 	"crypto/md5"
 	"crypto/sha1"
@@ -12,6 +10,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
+	"strings"
 	"time"
 	"unicode/utf8"
 )
@@ -33,10 +33,6 @@ type New struct {
 
 //Request is request to API Zadarma "https://api.zadarma.com"
 func (z *New) Request(slb *[]byte) error {
-	//new datas after every new request
-	//z.SortedParamsString = ""
-	//z.Signature = ""
-	//z.ResponseRaw = []byte{}
 
 	if z.HTTPMethod == "" {
 		z.HTTPMethod = http.MethodGet
@@ -61,8 +57,6 @@ func (z *New) Request(slb *[]byte) error {
 	if err != nil {
 		return err
 	}
-
-	httpRequest.Header.Set("Authorization", z.APIUserKey+":"+z.Signature)
 
 	//Timeout request
 	client := &http.Client{Timeout: time.Millisecond * time.Duration(z.Timeout)}
@@ -106,12 +100,12 @@ func prepareData(z *New) (string, error) {
 	//high ParamsUrlValues
 	//medium ParamsMap
 	//low ParamsString
-	if len(z.ParamsUrlValues) == 0 { //  <---high priority
-		if len(z.ParamsMap) > 0 { //  <---medium priority
+	if len(z.ParamsUrlValues) == 0 { //  <---high ParamsUrlValues priority
+		if len(z.ParamsMap) > 0 { //  <---medium ParamsMap priority
 			for k, v := range z.ParamsMap {
 				z.ParamsUrlValues.Set(k, v)
 			}
-		} else if z.ParamsString != "" { //  <---low priority
+		} else if z.ParamsString != "" { //  <---low ParamsString priority
 			if urlValues, err := url.ParseQuery(z.ParamsString); err != nil {
 				return "", err
 			} else {
@@ -125,12 +119,25 @@ func prepareData(z *New) (string, error) {
 }
 
 func getHttpRequest(z *New) (*http.Request, error) {
-	return http.NewRequestWithContext( // maybe need http.NewRequest()
-		context.Background(),
+	r, err := http.NewRequest(
 		z.HTTPMethod,
-		z.LinkToAPI+z.APIMethod+"?"+z.SortedParamsString, //URL to API
-		bytes.NewBuffer([]byte("")),
+		z.LinkToAPI+z.APIMethod+"?"+z.SortedParamsString, //URL to API,
+		strings.NewReader(z.ParamsUrlValues.Encode()),    //post
 	)
+
+	r.Header.Set("Authorization", z.APIUserKey+":"+z.Signature)
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	r.Header.Set("Content-Length", strconv.Itoa(len(z.ParamsUrlValues.Encode())))
+
+	return r, err
+
+	// return http.NewRequestWithContext( // maybe need http.NewRequest()
+	// 	context.Background(),
+	// 	z.HTTPMethod,
+	// 	z.LinkToAPI+z.APIMethod+"?"+z.SortedParamsString, //URL to API
+	// 	bytes.NewBuffer([]byte(z.LinkToAPI+z.APIMethod+"?"+z.SortedParamsString)),
+	// )
+
 }
 
 func createSignature(z *New) string {
