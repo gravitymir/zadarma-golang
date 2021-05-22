@@ -63,17 +63,11 @@ func TestParamsString(t *testing.T) {
 }
 
 func TestParamsMap(t *testing.T) {
-	// paramsUrlValues := url.Values{
-	// 	"start": []string{"2018-09-01 08:00:00"},
-	// 	"end":   []string{"2018-10-04 08:00:00"},
-	// }
 
 	paramsMap := map[string]string{
 		"end":   "2018-10-04 08:00:00",
 		"start": "2018-09-01 08:00:00",
 	}
-
-	//paramsString := "start=2018-09-01 08:00:00&end=2018-10-04 08:00:00"
 
 	statistics := New{
 		APIMethod:    "/v1/statistics/",
