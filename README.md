@@ -61,7 +61,8 @@ func prettyPrint(data interface{}) {
 
 ## Example get balance
 
-[https://zadarma.com/ru/support/api/#api_info_balance](https://zadarma.com/ru/support/api/#api_info_balance)
+<a href="https://zadarma.com/ru/support/api/#api_info_balance" target="_blank">https://zadarma.com/ru/support/api/#api_info_balance</a>
+
 ``` go
 func infoBalance() error {
 
