@@ -27,12 +27,13 @@ type New struct {
 	ParamsMap          map[string]string
 	ParamsString       string
 	SortedParamsString string
+	FullLink           string
 	Timeout            uint64
 	Signature          string
 }
 
 //Request is request to API Zadarma "https://api.zadarma.com"
-func (z *New) Request() ([]byte, error) {
+func (z *New) Request(slb *[]byte) error {
 	//new datas after every new request
 	//z.SortedParamsString = ""
 	//z.Signature = ""
@@ -49,7 +50,7 @@ func (z *New) Request() ([]byte, error) {
 	}
 
 	if sps, err := prepareData(z); err != nil {
-		return []byte{}, err
+		return err
 	} else {
 		z.SortedParamsString = sps
 	}
@@ -59,7 +60,7 @@ func (z *New) Request() ([]byte, error) {
 	httpRequest, err := getHttpRequest(z)
 
 	if err != nil {
-		return []byte{}, err
+		return err
 	}
 
 	httpRequest.Header.Set("Authorization", z.APIUserKey+":"+z.Signature)
@@ -69,17 +70,27 @@ func (z *New) Request() ([]byte, error) {
 
 	httpResponse, err := client.Do(httpRequest) //request
 	if err != nil {
-		return []byte{}, err
+		return err
 	}
 	defer httpResponse.Body.Close()
 
-	responseBody, err := ioutil.ReadAll(httpResponse.Body)
+	*slb, err = ioutil.ReadAll(httpResponse.Body)
 
 	if err != nil {
-		return []byte{}, err
+		return err
 	}
+	//https://play.golang.org/p/An7jG5xl2W
+	// rv := reflect.ValueOf(responseBody)
 
-	return responseBody, nil
+	// var sl = struct {
+	// 	addr uintptr
+	// 	len  int
+	// 	cap  int
+	// }{rv.Pointer(), rv.Len(), rv.Len()}
+
+	// *b = *(*[]byte)(unsafe.Pointer(&sl))
+
+	return nil
 }
 
 func prepareData(z *New) (string, error) {
@@ -101,7 +112,6 @@ func prepareData(z *New) (string, error) {
 			for k, v := range z.ParamsMap {
 				z.ParamsUrlValues.Set(k, v)
 			}
-
 		} else if z.ParamsString != "" { //  <---low priority
 			if urlValues, err := url.ParseQuery(z.ParamsString); err != nil {
 				return "", err
@@ -116,6 +126,7 @@ func prepareData(z *New) (string, error) {
 }
 
 func getHttpRequest(z *New) (*http.Request, error) {
+	z.FullLink = z.LinkToAPI + z.APIMethod + "?" + z.SortedParamsString
 	return http.NewRequestWithContext( // maybe need http.NewRequest()
 		context.Background(),
 		z.HTTPMethod,

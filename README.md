@@ -18,3 +18,61 @@
 
 # zadarma-golang
 Library which help you work with API Zadarma (v1)
+
+``` go
+package main
+
+import (
+	"encoding/json"
+	"errgroup"
+	"fmt"
+
+	zApi "github.com/gravitymir/zadarma-golang/zadarma"
+	//"golang.org/x/sync/errgroup"
+)
+
+func main() {
+	if err := run(); err != nil {
+		fmt.Printf("%v\n", err)
+	}
+}
+
+type jsonTarget struct {
+	Status string `json:"status"`
+}
+
+func run() error {
+
+	g := new(errgroup.Group)
+
+	g.Go(func() error {
+
+		paramsMap := map[string]string{
+			"end":   "2018-10-04 08:00:00",
+			"start": "2018-09-01 08:00:00",
+		}
+
+		statistics := zApi.New{
+			APIMethod:    "/v1/statistics/",
+			APIUserKey:   "e30e16c201343883f77e",
+			APISecretKey: "dbf5606ea4c1f2234201",
+			ParamsMap:    paramsMap, //medium priority, if not set ParamsUrlValues
+		}
+
+		responceData, err := statistics.Request()
+
+		if err != nil {
+			return err
+		}
+
+		targetData := jsonTarget{}
+		if err := json.Unmarshal(responceData, &targetData); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return g.Wait()
+}
+```

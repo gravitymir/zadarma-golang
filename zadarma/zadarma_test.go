@@ -2,6 +2,7 @@ package zadarma
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
 )
 
@@ -21,17 +22,19 @@ func TestRequest(t *testing.T) {
 		APISecretKey: SecretKey,
 	}
 
-	responceData, err := number_lookup.Request()
-	if err != nil {
+	data := []byte{}
+
+	if err := number_lookup.Request(&data); err != nil {
 		t.Error(err)
 	}
 
-	targetData := jsonTarget{}
-	if err := json.Unmarshal(responceData, &targetData); err != nil {
+	jt := jsonTarget{}
+
+	if err := json.Unmarshal(data, &jt); err != nil {
 		t.Error(err)
 	}
-	if targetData.Status != "success" && targetData.Status != "error" {
-		t.Error(err)
+	if jt.Status != "success" && jt.Status != "error" {
+		t.Error(errors.New("Error jt.Status != success, error"))
 	}
 }
 
@@ -45,16 +48,17 @@ func TestParamsString(t *testing.T) {
 		ParamsString: paramsString,
 	}
 
-	responceData, err := number_lookup.Request()
-	if err != nil {
+	data := []byte{}
+
+	if err := number_lookup.Request(&data); err != nil {
 		t.Error(err)
 	}
-	targetData := jsonTarget{}
-	if err := json.Unmarshal(responceData, &targetData); err != nil {
+	jt := jsonTarget{}
+	if err := json.Unmarshal(data, &jt); err != nil {
 		t.Error(err)
 	}
-	if targetData.Status != "success" && targetData.Status != "error" {
-		t.Error(err)
+	if jt.Status != "success" && jt.Status != "error" {
+		t.Error(errors.New("Error jt.Status != success, error"))
 	}
 }
 
@@ -78,19 +82,19 @@ func TestParamsMap(t *testing.T) {
 		ParamsMap:    paramsMap, //medium priority, if not set ParamsUrlValues
 	}
 
-	responceData, err := statistics.Request()
+	data := []byte{}
 
-	if err != nil {
+	if err := statistics.Request(&data); err != nil {
 		t.Error(err)
 	}
 	if statistics.Signature != "ZmI3YzA1MmJkNzQyYmE1YzI3OWY3OTRjNTlmZDFkMTE2MmI4YmI0Yg==" {
+		t.Error(errors.New("Error wrong statistics.Signature"))
+	}
+	jt := jsonTarget{}
+	if err := json.Unmarshal(data, &jt); err != nil {
 		t.Error(err)
 	}
-	targetData := jsonTarget{}
-	if err := json.Unmarshal(responceData, &targetData); err != nil {
-		t.Error(err)
-	}
-	if targetData.Status != "success" && targetData.Status != "error" {
-		t.Error(err)
+	if jt.Status != "success" && jt.Status != "error" {
+		t.Error(errors.New("Error jt.Status != success, error"))
 	}
 }
