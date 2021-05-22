@@ -53,7 +53,7 @@ func infoBalance() error {
 		Currency string  `json:"currency"`
 		Message  string  `json:"message"`
 	}{}
-	//or catchDataToStruct := zApi.CatchInfoBalance{}, if implement zApi.CatchInfoBalance
+	//or catchDataToStruct := zApi.CatchInfoBalance{},  if zApi.(struct) implement
 
 	if err := json.Unmarshal(data, &catchDataToStruct); err != nil {
 		return err
@@ -103,7 +103,7 @@ func infoPrice() error {
 		return err
 	}
 
-	king := zApi.CatchInfoPrice{}
+	king := zApi.CatchInfoPrice{} //if zApi.(struct) implement
 	if err := json.Unmarshal(dataKingdom, &king); err != nil {
 		return err
 	}
@@ -158,7 +158,7 @@ func infoPrice() error {
 	if err := priceRusFed.Request(&dataRusFed); err != nil { //try again
 		return err
 	}
-	resp = zApi.CatchInfoPrice{}
+	resp = zApi.CatchInfoPrice{} //if zApi.(struct) implement
 	if err := json.Unmarshal(dataRusFed, &resp); err != nil {
 		return err
 	}
@@ -210,7 +210,8 @@ func statistics() error {
 	}
 
 	catchDataToStruct := zApi.CatchStatistics{}
-	//or catchDataToStruct := CatchStatistics{}, if zApi.CatchStatistics not implement
+	//or
+    catchDataToStruct := CatchStatistics{}, //if zApi.(struct) not implement
 
 	if err := json.Unmarshal(data, &catchDataToStruct); err != nil {
 		return err
@@ -271,8 +272,15 @@ func smsSend() error {
 		return err
 	}
 
-	result := zApi.CatchSmsSend{}
-	//or catchDataToStruct := CatchStatistics{}, if zApi.CatchStatistics not implement
+	result := zApi.CatchSmsSend{} //if zApi.CatchStatistics implement
+	//or
+	result = struct {
+		Status   string  `json:"status"`
+		Messages int     `json:"messages"`
+		Cost     float32 `json:"cost"`
+		Currency string  `json:"currency"`
+		Message  string  `json:"message"`
+	}{}
 
 	if err := json.Unmarshal(data, &result); err != nil {
 		return err
