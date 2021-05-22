@@ -60,6 +60,8 @@ func prettyPrint(data interface{}) {
 ```
 
 ## Example get balance
+
+[https://zadarma.com/ru/support/api/#api_info_balance](https://zadarma.com/ru/support/api/#api_info_balance)
 ``` go
 func infoBalance() error {
 
@@ -93,7 +95,9 @@ func infoBalance() error {
 }
 ```
 
-## Example
+## Example Price
+
+[https://zadarma.com/ru/support/api/#api_info_price](https://zadarma.com/ru/support/api/#api_info_price)
 ``` go
 func infoPrice() error {
 
@@ -202,6 +206,8 @@ func infoPrice() error {
 ```
 
 ## Get statistics
+
+[https://zadarma.com/ru/support/api/#api_statistic](https://zadarma.com/ru/support/api/#api_statistic)
 ``` go
 func statistics() error {
 
@@ -257,6 +263,8 @@ func statistics() error {
 ```
 
 ## Get timezone
+
+[https://zadarma.com/ru/support/api/#api_info_timezone](https://zadarma.com/ru/support/api/#api_info_timezone)
 ``` go
 func infoTimezone() error {
 
@@ -278,7 +286,7 @@ func infoTimezone() error {
 
 ## HTTPMethod POST Send SMS
 
-[api_sms_send](https://zadarma.com/ru/support/api/#api_sms_send)
+[https://zadarma.com/ru/support/api/#api_sms_send](https://zadarma.com/ru/support/api/#api_sms_send)
 
 ``` go
 func smsSend() error {
