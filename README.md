@@ -19,6 +19,8 @@
 # zadarma-golang
 Library which help you work with API Zadarma (v1)
 
+
+## Main file for next examples
 ``` go
 package main
 
@@ -47,6 +49,7 @@ func main() {
 	}
 
 }
+
 func prettyPrint(data interface{}) {
 	dataJSON, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
@@ -54,7 +57,10 @@ func prettyPrint(data interface{}) {
 	}
 	fmt.Printf("\n%s\n", string(dataJSON))
 }
+```
 
+## Example get balance
+``` go
 func infoBalance() error {
 
 	balance := zApi.New{
@@ -85,7 +91,10 @@ func infoBalance() error {
 
 	return nil
 }
+```
 
+## Example
+``` go
 func infoPrice() error {
 
 	priceKazakhstan := zApi.New{
@@ -190,7 +199,10 @@ func infoPrice() error {
 
 	return nil
 }
+```
 
+## Get statistics
+``` go
 func statistics() error {
 
 	type CatchStatistics struct {
@@ -242,7 +254,10 @@ func statistics() error {
 
 	return nil
 }
+```
 
+## Get timezone
+``` go
 func infoTimezone() error {
 
 	timeZone := zApi.New{
@@ -259,12 +274,14 @@ func infoTimezone() error {
 	fmt.Printf("%+v", string(data))
 	return nil
 }
+```
 
-//HTTPMethod Post
+## HTTPMethod Post
+``` go
 func smsSend() error {
 
 	sms := zApi.New{
-		HTTPMethod:   http.MethodPost, // or "POST"
+		HTTPMethod:   http.MethodPost,
 		APIMethod:    "/v1/sms/send/",
 		APIUserKey:   "e30e16c201343883f77e",
 		APISecretKey: "dbf5606ea4c1f2234201",
