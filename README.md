@@ -5,7 +5,7 @@
 [![GitHub open issues](https://img.shields.io/github/issues/gravitymir/zadarma-golang?logo=github)](https://github.com/gravitymir/zadarma-golang/issues)
 [![GitHub closed issues](https://img.shields.io/github/issues-closed/gravitymir/zadarma-golang?logo=github)](https://github.com/gravitymir/zadarma-golang/issues)
 
-[![made-with-Go](https://img.shields.io/badge/Zadarma-Go-00aed8?logo=go)](https://pkg.go.dev/search?q=zadarma)
+[![made-with-Go](https://img.shields.io/badge/Zadarma-Go-00aed8?logo=go)](https://pkg.go.dev/github.com/gravitymir/zadarma-golang/zadarma)
 [![Golang go.mod Go version](https://img.shields.io/github/go-mod/go-version/gravitymir/zadarma-golang?label=mod&logo=go)](https://pkg.go.dev/search?q=zadarma)
 [![GoReportCard](https://goreportcard.com/badge/github.com/gravitymir/zadarma-golang)](https://goreportcard.com/report/github.com/gravitymir/zadarma-golang)
 
