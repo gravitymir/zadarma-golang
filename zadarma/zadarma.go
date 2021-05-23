@@ -22,7 +22,6 @@ type New struct {
 	APISecretKey       string
 	HTTPMethod         string
 	APIMethod          string
-	LinkToAPI          string
 	ParamsUrlValues    url.Values
 	ParamsMap          map[string]string
 	ParamsString       string
@@ -34,12 +33,6 @@ type New struct {
 //Request is request to API Zadarma "https://api.zadarma.com"
 func (z *New) Request(slb *[]byte) error {
 
-	if z.HTTPMethod == "" {
-		z.HTTPMethod = http.MethodGet
-	}
-	if z.LinkToAPI == "" {
-		z.LinkToAPI = "https://api.zadarma.com"
-	}
 	if len(z.ParamsUrlValues) == 0 {
 		z.ParamsUrlValues = url.Values{}
 	}
@@ -121,8 +114,8 @@ func prepareData(z *New) (string, error) {
 func getHttpRequest(z *New) (*http.Request, error) {
 	r, err := http.NewRequest(
 		z.HTTPMethod,
-		z.LinkToAPI+z.APIMethod+"?"+z.SortedParamsString, //URL to API,
-		strings.NewReader(z.ParamsUrlValues.Encode()),    //post
+		"https://api.zadarma.com"+z.APIMethod+"?"+z.SortedParamsString, //URL to API,
+		strings.NewReader(z.ParamsUrlValues.Encode()),                  //post
 	)
 
 	r.Header.Set("Authorization", z.APIUserKey+":"+z.Signature)
@@ -130,14 +123,6 @@ func getHttpRequest(z *New) (*http.Request, error) {
 	r.Header.Set("Content-Length", strconv.Itoa(len(z.ParamsUrlValues.Encode())))
 
 	return r, err
-
-	// return http.NewRequestWithContext( // maybe need http.NewRequest()
-	// 	context.Background(),
-	// 	z.HTTPMethod,
-	// 	z.LinkToAPI+z.APIMethod+"?"+z.SortedParamsString, //URL to API
-	// 	bytes.NewBuffer([]byte(z.LinkToAPI+z.APIMethod+"?"+z.SortedParamsString)),
-	// )
-
 }
 
 func createSignature(z *New) string {

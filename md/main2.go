@@ -211,7 +211,7 @@ func statistics() error {
 
 	catchDataToStruct := zApi.CatchStatistics{}
 	//or
-    catchDataToStruct := CatchStatistics{}, //if zApi.(struct) not implement
+	//catchDataToStruct := CatchStatistics{}, //if zApi.(struct) not implement
 
 	if err := json.Unmarshal(data, &catchDataToStruct); err != nil {
 		return err

@@ -294,7 +294,7 @@ func infoTimezone() error {
 func smsSend() error {
 
 	sms := zApi.New{
-		HTTPMethod:   http.MethodPost, // or "POST"
+		HTTPMethod:   http.MethodPost,
 		APIMethod:    "/v1/sms/send/",
 		APIUserKey:   "e30e16c201343883f77e",
 		APISecretKey: "dbf5606ea4c1f2234201",
