@@ -3,10 +3,6 @@ build:
 		go build -o z_api -v ./
 		./z_api
 
-build2:
-		go build -o z_api -v ./md
-		./z_api
-
 .PHONY: test
 test:
 #go test -v -race -timeout 30s ./...
