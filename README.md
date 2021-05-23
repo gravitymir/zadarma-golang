@@ -270,10 +270,13 @@ func statistics() error {
 ``` go
 func infoTimezone() error {
 
-	timeZone := zApi.New{
+    key   := "e30e16c201343883f77e"
+	secret := "dbf5606ea4c1f2234201"
+	
+    timeZone := zApi.New{
 		APIMethod:    "/v1/info/timezone/",
-		APIUserKey:   "e30e16c201343883f77e",
-		APISecretKey: "dbf5606ea4c1f2234201",
+		APIUserKey:   key,
+		APISecretKey: secret,
 	}
 
 	data := []byte{}

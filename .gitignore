@@ -5,6 +5,7 @@
 *.so
 *.dylib
 z_api
+main_test.go
 
 # Test binary, built with `go test -c`
 *.test

@@ -65,16 +65,6 @@ func (z *New) Request(slb *[]byte) error {
 	if err != nil {
 		return err
 	}
-	//https://play.golang.org/p/An7jG5xl2W
-	// rv := reflect.ValueOf(responseBody)
-
-	// var sl = struct {
-	// 	addr uintptr
-	// 	len  int
-	// 	cap  int
-	// }{rv.Pointer(), rv.Len(), rv.Len()}
-
-	// *b = *(*[]byte)(unsafe.Pointer(&sl))
 
 	return nil
 }
