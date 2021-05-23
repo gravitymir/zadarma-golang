@@ -11,7 +11,6 @@
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/gravitymir/zadarma-golang?label=zadarma-golang&logo=github&color=505050&logoColor=fff)](https://github.com/gravitymir/zadarma-golang)
 [![GitHub User's stars](https://img.shields.io/github/stars/gravitymir?label=gravitymir&logo=github&color=505050&logoColor=fff)](https://github.com/gravitymir)
-[![Linkedin](https://img.shields.io/badge/AndreySukhodeev-linkedin?logo=linkedin&color=4d4d4d&
 
 ![Zadarma Golang](https://raw.githubusercontent.com/gravitymir/zadarma-golang/master/zadarma_golang.jpg)
 
