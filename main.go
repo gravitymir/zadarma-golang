@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	zApi "github.com/gravitymir/zadarma-golang/zadarma"
+	zApi "github.com/gravitymir/zadarma-golang/v1"
 )
 
 func main() {
@@ -34,14 +34,12 @@ func prettyPrint(data interface{}) {
 }
 
 func infoBalance() error {
-
+	data := []byte{}
 	balance := zApi.New{
 		APIMethod:    "/v1/info/balance/",
 		APIUserKey:   "e30e16c201343883f77e",
 		APISecretKey: "dbf5606ea4c1f2234201",
 	}
-
-	data := []byte{}
 
 	if err := balance.Request(&data); err != nil {
 		return err

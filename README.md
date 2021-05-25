@@ -28,7 +28,7 @@ import (
 	"net/http"
 	"net/url"
 
-	zApi "github.com/gravitymir/zadarma-golang/zadarma"
+	zApi "github.com/gravitymir/zadarma-golang/v1"
 )
 
 func main() {
@@ -81,7 +81,7 @@ func infoBalance() error {
 		Status   string  `json:"status"`
 		Balance  float32 `json:"balance"`
 		Currency string  `json:"currency"`
-		Message  string  `json:"message"`
+		Message  string  `json:"message"`//if status == error
 	}{}
 	//or catchDataToStruct := zApi.CatchInfoBalance{},  if zApi.(struct) implement
     //not all ctructs implement !!!
